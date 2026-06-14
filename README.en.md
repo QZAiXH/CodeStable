@@ -12,7 +12,7 @@ Tired of OpenSpec's flimsiness, Oh-My-OpenAgent's over-engineering, and Superpow
 
 <p>
   <img src="https://img.shields.io/badge/status-beta-F59E0B?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/skills-23-6366F1?style=flat-square" alt="Skills"/>
+  <img src="https://img.shields.io/badge/skills-27-6366F1?style=flat-square" alt="Skills"/>
   <img src="https://img.shields.io/badge/license-MIT-10B981?style=flat-square" alt="License"/>
 </p>
 
@@ -23,10 +23,22 @@ Tired of OpenSpec's flimsiness, Oh-My-OpenAgent's over-engineering, and Superpow
 ## Install
 
 ```bash
-npx skills add https://github.com/liuzhengdongfortest/CodeStable
+npx skills add https://github.com/QZAiXH/CodeStable
 ```
 
-One command to start working:
+This repository is discovered by `npx skills add` as 27 installable skills. To pull every CodeStable skill while still choosing agents and installation scope interactively, run:
+
+```bash
+npx skills add https://github.com/QZAiXH/CodeStable --skill '*'
+```
+
+For a fully non-interactive install of every skill to every supported agent, run:
+
+```bash
+npx skills add https://github.com/QZAiXH/CodeStable --all
+```
+
+After installation, onboard CodeStable in the target project:
 
 ```bash
 /cs-onboard
@@ -44,7 +56,7 @@ For daily use, when you don't know which skill fits, call the root entry:
 
 ## Why
 
-I was building a new harness agent ([MA](https://github.com/liuzhengdongfortest/MA)) — vibe-coding at first, just writing designs and requirements while AI wrote the code. It carried most features, until Codex repeatedly failed on a problem I thought was simple, making the same mistake in the same place. That's when I knew the project needed a workflow to keep moving.
+I was building a new harness agent — vibe-coding at first, just writing designs and requirements while AI wrote the code. It carried most features, until Codex repeatedly failed on a problem I thought was simple, making the same mistake in the same place. That's when I knew the project needed a workflow to keep moving.
 
 I surveyed OpenSpec, SuperPowers, Oh-My-OpenAgent — none felt right:
 
@@ -70,7 +82,7 @@ CodeStable goes the **other way**:
 <tr><th></th><th>Agent-orchestration camp</th><th>CodeStable</th></tr>
 <tr><td><b>Core entity</b></td><td>Agent / Role / Team</td><td>Requirement / Architecture / Feature / Issue / Decision</td></tr>
 <tr><td><b>Main question</b></td><td>How do agents divide work, hand off, coordinate?</td><td>How do requirements, constraints, decisions get recorded, retrieved, reused?</td></tr>
-<tr><td><b>Where state lives</b></td><td>Agent sessions / message buses / queues</td><td>The <code>codestable/</code> file tree in your project (readable by both humans and AI)</td></tr>
+<tr><td><b>Where state lives</b></td><td>Agent sessions / message buses / queues</td><td>The <code>.codestable/</code> file tree in your project (readable by both humans and AI)</td></tr>
 <tr><td><b>Pain it solves</b></td><td>One agent isn't enough; need coordination to scale</td><td>Software complexity overflows context; tacit knowledge gets lost; requirements drift</td></tr>
 <tr><td><b>Role of humans</b></td><td>The less the better — full automation is the ideal</td><td>Human-in-the-loop — the programmer owns the whole; AI is an efficient executor</td></tr>
 </table>
@@ -87,11 +99,11 @@ I built CodeStable because I believe **the chaos of software engineering isn't r
 
 ---
 
-## Design: 6 entities + 3 flows
+## Design: 7 entities + 3 flows
 
-CodeStable models real coding work as **6 entities** and **3 flows**.
+CodeStable models real coding work as **7 entities** and **3 flows**.
 
-### 6 entities
+### 7 entities
 
 | Entity | Slug | What it does |
 |------|------|--------|
@@ -100,6 +112,7 @@ CodeStable models real coding work as **6 entities** and **3 flows**.
 | **Roadmap** | roadmap | "I want a permission system" — too big to throw at AI as a feature; cut it into a roadmap and advance step by step |
 | **Feature** | feature | The actual engineering execution. Human and AI collaborate, jointly responsible for design / implementation / acceptance |
 | **Issue** | issue | The bug list after release. AI and human solve it together |
+| **Audit** | audit | Proactive scans for system risk, architectural drift, and maintainability debt. Produces findings, not fixes |
 | **Compound** | compound | The compounding-engineering knowledge base — pitfalls, good practices, technical decisions |
 
 ### 3 flows
@@ -119,7 +132,7 @@ CodeStable models real coding work as **6 entities** and **3 flows**.
 <tr><td><b>Root entry</b></td><td><code>cs</code></td><td>Unified entry — introduces the system and routes open-ended intents to the right cs-* skill. Call it when you don't know which one fits</td></tr>
 <tr><td><b>Onboard</b></td><td><code>cs-onboard</code></td><td>Bring CodeStable into a new repo or one with scattered docs</td></tr>
 <tr><td rowspan="2"><b>Requirement & architecture</b></td><td><code>cs-req</code></td><td>Curate / accumulate raw requirement docs</td></tr>
-<tr><td><code>cs-arch</code></td><td>Draft or update architecture docs under <code>codestable/architecture/</code></td></tr>
+<tr><td><code>cs-arch</code></td><td>Draft or update architecture docs under <code>.codestable/architecture/</code></td></tr>
 <tr><td><b>Roadmap</b></td><td><code>cs-roadmap</code></td><td>Up-front planning for a big chunk of work: high-level design + interface contracts + sub-feature breakdown</td></tr>
 <tr><td><b>Discussion entry</b></td><td><code>cs-brainstorm</code></td><td>Triage when ideas are still fuzzy: route to design / continue in a feature / hand off to roadmap</td></tr>
 <tr><td rowspan="5"><b>Feature flow</b></td><td><code>cs-feat</code></td><td>Sub-flow entry for new features</td></tr>
@@ -133,12 +146,15 @@ CodeStable models real coding work as **6 entities** and **3 flows**.
 <tr><td><code>cs-issue-fix</code></td><td>Targeted fix + verification + write fix-note</td></tr>
 <tr><td rowspan="2"><b>Refactor flow</b></td><td><code>cs-refactor</code></td><td>(beta) Main refactor flow</td></tr>
 <tr><td><code>cs-refactor-ff</code></td><td>(beta) Light refactor lane</td></tr>
-<tr><td rowspan="3"><b>Knowledge sink</b></td><td><code>cs-learn</code></td><td>Sink pitfalls / good practices into learning docs</td></tr>
+<tr><td><b>System audit</b></td><td><code>cs-audit</code></td><td>Proactively scan for bugs, security risk, performance issues, maintainability debt, and architecture drift; produce findings only</td></tr>
+<tr><td rowspan="4"><b>Knowledge sink</b></td><td><code>cs-learn</code></td><td>Sink pitfalls / good practices into learning docs</td></tr>
 <tr><td><code>cs-trick</code></td><td>Curate reusable patterns / library usage as prescriptive references</td></tr>
 <tr><td><code>cs-decide</code></td><td>Record settled tech choices, architectural decisions, long-term constraints as permanent docs</td></tr>
+<tr><td><code>cs-note</code></td><td>Write short always-needed project notes to <code>.codestable/attention.md</code></td></tr>
 <tr><td><b>Loop orchestration</b></td><td><code>cs-loop</code></td><td>Use decision-codex proposals, approval-codex review, and worker-codex execution to run a traceable low-level decision loop</td></tr>
 <tr><td rowspan="2"><b>Explore & docs</b></td><td><code>cs-explore</code></td><td>Targeted code exploration; sink "ask → read → conclude" into evidence</td></tr>
 <tr><td><code>cs-guide</code> / <code>cs-libdoc</code></td><td>Outward-facing developer guides / library reference docs</td></tr>
+<tr><td><b>Browser tool</b></td><td><code>browser-bridge</code></td><td>Control real pages through a browser extension for automation, data extraction, and component evidence capture</td></tr>
 </table>
 
 ---
@@ -164,15 +180,15 @@ CodeStable's skills aren't a single linear pipeline — they're **layered + even
 ═══════════════════════════════════════════════════════════════════════
  Phase 0 · Onboard                            (runs once per project)
 ───────────────────────────────────────────────────────────────────────
-   cs-onboard ──▶ Generate codestable/ skeleton + release reference/, tools/
+   cs-onboard ──▶ Generate .codestable/ skeleton + release reference/, tools/
 ═══════════════════════════════════════════════════════════════════════
                               │
                               ▼
 ═══════════════════════════════════════════════════════════════════════
  Layer 1 · Long-lived archive ("what the system looks like now")
 ───────────────────────────────────────────────────────────────────────
-   cs-req   ──▶ codestable/requirements/{slug}.md
-   cs-arch  ──▶ codestable/architecture/ARCHITECTURE.md
+   cs-req   ──▶ .codestable/requirements/{slug}.md
+   cs-arch  ──▶ .codestable/architecture/ARCHITECTURE.md
                                        └─ {type}-{slug}.md (subsystems)
 ═══════════════════════════════════════════════════════════════════════
                               │
@@ -180,7 +196,7 @@ CodeStable's skills aren't a single linear pipeline — they're **layered + even
 ═══════════════════════════════════════════════════════════════════════
  Layer 2 · Planning ("how we plan to deliver this big thing next")
 ───────────────────────────────────────────────────────────────────────
-   cs-roadmap ──▶ codestable/roadmap/{slug}/
+   cs-roadmap ──▶ .codestable/roadmap/{slug}/
                   Turn "I want X" into a complete up-front plan:
                     ① High-level design — module / component split
                     ② Architectural detail — interface contracts
@@ -224,7 +240,7 @@ CodeStable's skills aren't a single linear pipeline — they're **layered + even
  Cross-cut · Knowledge sink (compounding engineering)
 ───────────────────────────────────────────────────────────────────────
    cs-learn   ──▶ ┐
-   cs-trick   ──▶ ├─▶ codestable/compound/YYYY-MM-DD-{doc_type}-{slug}.md
+   cs-trick   ──▶ ├─▶ .codestable/compound/YYYY-MM-DD-{doc_type}-{slug}.md
    cs-decide  ──▶ │     doc_type ∈ { learning, trick, decision, explore }
    cs-explore ──▶ ┘
                    ↑
@@ -243,11 +259,13 @@ CodeStable's skills aren't a single linear pipeline — they're **layered + even
 
 ## Runtime structure
 
-After `/cs-onboard`, a `codestable/` directory appears at your project root — the aggregate root for all CodeStable artifacts and the **only** workspace each skill reads/writes at runtime.
+After `/cs-onboard`, a `.codestable/` directory appears at your project root — the aggregate root for all CodeStable artifacts and the **only** workspace each skill reads/writes at runtime.
 
 ```
 your-project/
-├── codestable/
+├── .codestable/
+│   ├── attention.md                       # Project notes every CodeStable skill reads first
+│   │
 │   ├── requirements/                     # Requirement entities ("why this capability exists")
 │   │   └── {slug}.md                     # One file per capability, flat (no grouping)
 │   │
@@ -260,6 +278,9 @@ your-project/
 │   │       ├── {slug}-roadmap.md         # Main doc: background / breakdown / sequencing
 │   │       ├── {slug}-items.yaml         # Machine-readable sub-feature list, acceptance writes status back
 │   │       └── drafts/                   # Optional: drafts / research
+│   │
+│   ├── brainstorms/                      # Early grill / divergent discussion for big needs
+│   │   └── {slug}/brainstorm.md
 │   │
 │   ├── features/                         # Feature flow aggregate root
 │   │   └── YYYY-MM-DD-{slug}/            # One directory per feature
@@ -281,9 +302,16 @@ your-project/
 │   │       ├── {slug}-checklist.yaml
 │   │       └── {slug}-apply-notes.md
 │   │
+│   ├── audits/                           # Proactive audit findings
+│   │   └── YYYY-MM-DD-{slug}/
+│   │       └── {slug}-audit.md
+│   │
 │   ├── compound/                         # Knowledge sink (compounding engineering), unified directory
 │   │   └── YYYY-MM-DD-{doc_type}-{slug}.md
 │   │       # doc_type ∈ {learning, trick, decision, explore}
+│   │
+│   ├── loops/                            # Loop engineering control layer
+│   │   └── YYYY-MM-DD-{slug}/
 │   │
 │   ├── tools/                            # Cross-workflow shared scripts (released by onboard)
 │   └── reference/                        # Shared reference docs (released by onboard)
@@ -291,14 +319,16 @@ your-project/
 │       ├── system-overview.md            # CodeStable system overview + scenario routing
 │       └── ...
 │
-└── AGENTS.md                             # At project root, not under codestable/
+└── AGENTS.md                             # At project root, not under .codestable/
 ```
 
 **Key points:**
 
-- All artifacts aggregate under `codestable/`, so "how did we handle that feature / bug last time" is three seconds away
+- All artifacts aggregate under `.codestable/`, so "how did we handle that feature / bug last time" is three seconds away
 - `requirements/` and `architecture/` are **long-lived archives** (current state only); `roadmap/` is the **planning layer** (what's next) — deliberately separated
 - `features/` `issues/` `refactors/` use `YYYY-MM-DD-{slug}/` to bundle all related specs in one directory, no crossing
+- `audits/` only stores proactive findings; concrete fixes are routed into issue or refactor flows
+- `attention.md` is the short, stable project-note entry point maintained by `cs-note`
 - `compound/` is the **single** knowledge sink directory — learning / trick / decision / explore are distinguished by the `doc_type` field, not by sub-directories. Easier to search
 - `reference/` is copied in by `cs-onboard` from the skill package; to change shared conventions, edit the templates under `cs-onboard/reference/` — new projects pick up the new version on onboard
 
@@ -306,7 +336,7 @@ your-project/
 
 > A skill is an independent install unit. At runtime, **each skill can only see files inside its own package**. References like `B-skill/reference/xxx.md` written in skill A's SKILL.md are **simply unreachable** at runtime.
 >
-> Cross-skill shared references must go through the "working project" layer: `cs-onboard` copies them from the skill package to the project's `codestable/reference/`, and other skills read them via the project-relative path.
+> Cross-skill shared references must go through the "working project" layer: `cs-onboard` copies them from the skill package to the project's `.codestable/reference/`, and other skills read them via the project-relative path.
 
 To change shared conventions, edit the templates under `cs-onboard/reference/`; new projects pick them up at onboard time.
 
@@ -340,6 +370,6 @@ Issues welcome — share your real-world dev pain and refactoring experience.
 
 <div align="center">
 
-MIT License · by [@liuzhengdong](https://github.com/liuzhengdongfortest)
+MIT License · [@QZAiXH](https://github.com/QZAiXH)
 
 </div>
