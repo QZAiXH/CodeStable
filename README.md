@@ -12,7 +12,7 @@
 
 <p>
   <img src="https://img.shields.io/badge/status-beta-F59E0B?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/skills-22-6366F1?style=flat-square" alt="Skills"/>
+  <img src="https://img.shields.io/badge/skills-23-6366F1?style=flat-square" alt="Skills"/>
   <img src="https://img.shields.io/badge/license-MIT-10B981?style=flat-square" alt="License"/>
 </p>
 
@@ -138,6 +138,7 @@ CodeStable 顺着软件编码的真实流程来设计，把开发活动建模成
 <tr><td rowspan="3"><b>知识沉淀</b></td><td><code>cs-learn</code></td><td>把踩过的坑 / 好做法沉淀成 learning 文档</td></tr>
 <tr><td><code>cs-trick</code></td><td>把可复用的编程模式 / 库用法整理成处方性参考</td></tr>
 <tr><td><code>cs-decide</code></td><td>把已拍板的技术选型、架构决定、长期约束记成永久文档</td></tr>
+<tr><td><b>Loop 编排</b></td><td><code>cs-loop</code></td><td>用 decision-codex 起草、approval-codex 审批、worker-codex 执行，搭建可追溯的低等级决策自动推进闭环</td></tr>
 <tr><td rowspan="2"><b>探索 & 文档</b></td><td><code>cs-explore</code></td><td>定向代码探索，把"提问 → 读代码 → 得结论"沉淀成证据</td></tr>
 <tr><td><code>cs-guide</code> / <code>cs-libdoc</code></td><td>对外的开发者指南 / 库参考文档</td></tr>
 </table>

@@ -45,6 +45,16 @@ onboard 完成后骨架（`cs-onboard` 负责搭建）：
 ├── compound/              沉淀类文档统一目录
 │   └── YYYY-MM-DD-{doc_type}-{slug}.md
 │                          doc_type ∈ {learning, trick, decision, explore}
+├── loops/                 loop engineering 控制层（cs-loop 按需创建）
+│   └── YYYY-MM-DD-{slug}/
+│       ├── loop.md
+│       ├── state.yaml
+│       ├── decision-log.md
+│       ├── approval-log.md
+│       ├── worker-brief.md
+│       ├── human-escalation.md
+│       ├── human-decision.md
+│       └── runs/
 ├── brainstorm/            brainstorm 阶段 spike 实验代码区（cs-brainstorm 临时产出）
 │   └── {slug}/            一次 spike 一个子目录，文件名随意
 │                          验完不强制清理，结论回写到对应 brainstorm note
@@ -57,6 +67,7 @@ onboard 完成后骨架（`cs-onboard` 负责搭建）：
 - 需求文档：`requirements/{slug}.md`（能力愿景，不带日期前缀，扁平不分组）；中心索引 `requirements/VISION.md`
 - roadmap：`roadmap/{slug}/`（不带日期前缀，平铺不嵌套）
 - feature / issue / refactor 目录：带日期前缀 `YYYY-MM-DD-{slug}`
+- loop 目录：带日期前缀 `YYYY-MM-DD-{slug}`，只存控制层状态，不存 feature / issue / refactor 正文产物
 - 沉淀类：`compound/YYYY-MM-DD-{doc_type}-{slug}.md`，日期用**归档当天**
 - 架构 doc：`architecture/{type}-{slug}.md`（长效，不带日期前缀）；总入口固定 `ARCHITECTURE.md`
 - 项目注意事项入口固定为 `.codestable/attention.md`，所有 CodeStable 子技能启动前必须读取；不再兼容 `AGENTS.md` / `CLAUDE.md` 等外部入口
