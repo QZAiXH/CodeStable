@@ -12,7 +12,7 @@ Tired of OpenSpec's flimsiness, Oh-My-OpenAgent's over-engineering, and Superpow
 
 <p>
   <img src="https://img.shields.io/badge/status-beta-F59E0B?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/skills-22-6366F1?style=flat-square" alt="Skills"/>
+  <img src="https://img.shields.io/badge/skills-23-6366F1?style=flat-square" alt="Skills"/>
   <img src="https://img.shields.io/badge/license-MIT-10B981?style=flat-square" alt="License"/>
 </p>
 
@@ -136,6 +136,7 @@ CodeStable models real coding work as **6 entities** and **3 flows**.
 <tr><td rowspan="3"><b>Knowledge sink</b></td><td><code>cs-learn</code></td><td>Sink pitfalls / good practices into learning docs</td></tr>
 <tr><td><code>cs-trick</code></td><td>Curate reusable patterns / library usage as prescriptive references</td></tr>
 <tr><td><code>cs-decide</code></td><td>Record settled tech choices, architectural decisions, long-term constraints as permanent docs</td></tr>
+<tr><td><b>Loop orchestration</b></td><td><code>cs-loop</code></td><td>Use decision-codex proposals, approval-codex review, and worker-codex execution to run a traceable low-level decision loop</td></tr>
 <tr><td rowspan="2"><b>Explore & docs</b></td><td><code>cs-explore</code></td><td>Targeted code exploration; sink "ask → read → conclude" into evidence</td></tr>
 <tr><td><code>cs-guide</code> / <code>cs-libdoc</code></td><td>Outward-facing developer guides / library reference docs</td></tr>
 </table>
