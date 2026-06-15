@@ -139,6 +139,18 @@ LOOP_APPROVAL: REVISE
 
 Decision output does not include bounded CodeStable artifact paths.
 OUT
+      elif [ "$parsed_status" = "CONTINUE" ] && grep -Eiq '^Roadmap item:' <<<"$decision_text" && ! grep -Eiq '^Roadmap item:[[:space:]]*null' <<<"$decision_text" && ! grep -Fq "## Context Boundary" <<<"$decision_text"; then
+        cat > "$out" <<'OUT'
+LOOP_APPROVAL: REVISE
+
+Roadmap item worker brief lacks Context Boundary.
+OUT
+      elif [ "$parsed_status" = "CONTINUE" ] && grep -Eiq '^Roadmap item:' <<<"$decision_text" && ! grep -Eiq '^Roadmap item:[[:space:]]*null' <<<"$decision_text" && ! grep -Fq "## Previous Subtask Summary" <<<"$decision_text"; then
+        cat > "$out" <<'OUT'
+LOOP_APPROVAL: REVISE
+
+Roadmap item worker brief lacks Previous Subtask Summary.
+OUT
       elif [ "$parsed_status" = "DONE" ] && ! grep -Eiq 'verification|verified|passed|evidence' <<<"$decision_text"; then
         cat > "$out" <<'OUT'
 LOOP_APPROVAL: REVISE
@@ -264,6 +276,13 @@ Approval rationale before required status.
 LOOP_APPROVAL: APPROVED
 OUT
       ;;
+    escalate-missing-template)
+      cat > "$out" <<'OUT'
+LOOP_APPROVAL: ESCALATE
+
+Needs a human, but this report is missing the required template sections.
+OUT
+      ;;
     *)
       echo "unknown CODEX_STUB_APPROVAL" >&2
       exit 96
@@ -340,6 +359,10 @@ Active workflow: cs-feat
 
 # Worker Brief
 
+## Task
+
+Create the minimal feature artifact.
+
 ## Active Workflow
 
 `cs-feat`
@@ -356,6 +379,13 @@ Active workflow: cs-feat
 ## Verification
 
 - `test -f src/demo.txt`
+
+## Return Format
+
+- changed files
+- verification result
+- blockers
+- suggested next decision
 OUT
       ;;
     continue)
@@ -377,6 +407,43 @@ Create the minimal feature artifact.
 ## Inputs
 
 - loop: `.codestable/loops/2026-06-14-demo/loop.md`
+- relevant CodeStable artifacts:
+  - `.codestable/features/2026-06-14-demo/demo-design.md`
+
+## Allowed Changes
+
+- `src/demo.txt`
+
+## Verification
+
+- `test -f src/demo.txt`
+
+## Return Format
+
+- changed files
+- verification result
+- blockers
+- suggested next decision
+OUT
+      ;;
+    continue-missing-return-format)
+      cat > "$out" <<'OUT'
+LOOP_DECISION: CONTINUE
+
+Active workflow: cs-feat
+
+# Worker Brief
+
+## Task
+
+Create the minimal feature artifact.
+
+## Active Workflow
+
+`cs-feat`
+
+## Inputs
+
 - relevant CodeStable artifacts:
   - `.codestable/features/2026-06-14-demo/demo-design.md`
 
@@ -440,6 +507,10 @@ LOOP_DECISION: CONTINUE
 
 # Worker Brief
 
+## Task
+
+Create the minimal feature artifact.
+
 ## Active Workflow
 
 - Active workflow: `cs-feat`
@@ -458,6 +529,222 @@ LOOP_DECISION: CONTINUE
 ## Verification
 
 - `test -f src/demo.txt`
+
+## Return Format
+
+- changed files
+- verification result
+- blockers
+- suggested next decision
+OUT
+      ;;
+    roadmap-draft)
+      cat > "$out" <<'OUT'
+LOOP_DECISION: CONTINUE
+
+Active workflow: cs-roadmap
+Roadmap: permission-system
+Roadmap item: null
+Roadmap stage: roadmap-draft
+Previous subtask summary: null
+
+# Worker Brief
+
+## Task
+
+Create the permission-system roadmap plan and items.
+
+## Active Workflow
+
+`cs-roadmap`
+
+## Inputs
+
+- loop: `.codestable/loops/2026-06-14-demo/loop.md`
+- relevant CodeStable artifacts:
+  - `.codestable/roadmap/permission-system/permission-system-roadmap.md`
+  - `.codestable/roadmap/permission-system/permission-system-items.yaml`
+
+## Allowed Changes
+
+- `.codestable/roadmap/permission-system/permission-system-roadmap.md`
+- `.codestable/roadmap/permission-system/permission-system-items.yaml`
+
+## Do Not Change
+
+- `src/**`
+- `.codestable/features/**`
+
+## Verification
+
+- `python .codestable/tools/validate-yaml.py --file .codestable/roadmap/permission-system/permission-system-items.yaml --yaml-only`
+
+## Return Format
+
+- changed files
+- verification result
+- blockers
+- suggested next decision
+OUT
+      ;;
+    roadmap-item-start)
+      cat > "$out" <<'OUT'
+LOOP_DECISION: CONTINUE
+
+Active workflow: cs-feat
+Roadmap: permission-system
+Roadmap item: permission-rbac-core
+Roadmap stage: feature-design
+Previous subtask summary: Completed roadmap decomposition; no previous feature item.
+
+# Worker Brief
+
+## Task
+
+Start `permission-rbac-core` through cs-feat-design from the roadmap item.
+
+## Active Workflow
+
+`cs-feat`
+
+## Inputs
+
+- loop: `.codestable/loops/2026-06-14-demo/loop.md`
+- roadmap: `.codestable/roadmap/permission-system/permission-system-roadmap.md`
+- items: `.codestable/roadmap/permission-system/permission-system-items.yaml`
+- target feature: `.codestable/features/2026-06-14-permission-rbac-core/`
+
+## Allowed Changes
+
+- `.codestable/features/2026-06-14-permission-rbac-core/**`
+- `.codestable/roadmap/permission-system/permission-system-items.yaml`
+
+## Context Boundary
+
+This is a fresh roadmap item. Read only the inputs listed here, relevant architecture/requirements, and current code. Do not read previous feature directories or old worker outputs unless explicitly listed.
+
+## Previous Subtask Summary
+
+- Completed roadmap decomposition; no previous feature item.
+- Stable contracts live in `.codestable/roadmap/permission-system/permission-system-roadmap.md`.
+
+## Verification
+
+- `python .codestable/tools/validate-yaml.py --file .codestable/roadmap/permission-system/permission-system-items.yaml --yaml-only`
+
+## Return Format
+
+- changed files
+- verification result
+- blockers
+- suggested next decision
+OUT
+      ;;
+    roadmap-item-no-boundary)
+      cat > "$out" <<'OUT'
+LOOP_DECISION: CONTINUE
+
+Active workflow: cs-feat
+Roadmap: permission-system
+Roadmap item: permission-rbac-core
+Roadmap stage: feature-design
+
+# Worker Brief
+
+## Active Workflow
+
+`cs-feat`
+
+## Inputs
+
+- roadmap: `.codestable/roadmap/permission-system/permission-system-roadmap.md`
+- items: `.codestable/roadmap/permission-system/permission-system-items.yaml`
+- target feature: `.codestable/features/2026-06-14-permission-rbac-core/`
+
+## Allowed Changes
+
+- `.codestable/features/2026-06-14-permission-rbac-core/**`
+OUT
+      ;;
+    roadmap-item-no-summary)
+      cat > "$out" <<'OUT'
+LOOP_DECISION: CONTINUE
+
+Active workflow: cs-feat
+Roadmap: permission-system
+Roadmap item: permission-rbac-core
+Roadmap stage: feature-design
+
+# Worker Brief
+
+## Active Workflow
+
+`cs-feat`
+
+## Inputs
+
+- roadmap: `.codestable/roadmap/permission-system/permission-system-roadmap.md`
+- items: `.codestable/roadmap/permission-system/permission-system-items.yaml`
+- target feature: `.codestable/features/2026-06-14-permission-rbac-core/`
+
+## Allowed Changes
+
+- `.codestable/features/2026-06-14-permission-rbac-core/**`
+
+## Context Boundary
+
+This is a fresh roadmap item. Read only the inputs listed here.
+OUT
+      ;;
+    roadmap-list-metadata)
+      cat > "$out" <<'OUT'
+LOOP_DECISION: CONTINUE
+
+- Active workflow: `cs-feat`
+- active_roadmap: `permission-system`
+- roadmap_item: `permission-rbac-core`
+- roadmap_stage: `feature-impl`
+- previous_subtask_summary: Accepted "phase one" with path src\demo
+
+# Worker Brief
+
+## Task
+
+Continue `permission-rbac-core` through cs-feat-impl.
+
+## Active Workflow
+
+`cs-feat`
+
+## Inputs
+
+- roadmap: `.codestable/roadmap/permission-system/permission-system-roadmap.md`
+- items: `.codestable/roadmap/permission-system/permission-system-items.yaml`
+- target feature: `.codestable/features/2026-06-14-permission-rbac-core/`
+
+## Allowed Changes
+
+- `.codestable/features/2026-06-14-permission-rbac-core/**`
+- `.codestable/roadmap/permission-system/permission-system-items.yaml`
+
+## Context Boundary
+
+This is a fresh roadmap item. Read only the inputs listed here.
+
+## Previous Subtask Summary
+
+- Accepted phase one with path src\demo.
+
+## Verification
+
+- `test -f .codestable/roadmap/permission-system/permission-system-items.yaml`
+
+## Return Format
+
+- changed files
+- verification result
+- blockers
+- suggested next decision
 OUT
       ;;
     *)
@@ -478,6 +765,18 @@ suggested next decision:
 - inspect blocker
 OUT
     exit 42
+  elif [ "${CODEX_STUB_WORKER:-ok}" = "blocker" ]; then
+    cat > "$out" <<'OUT'
+changed files:
+- none
+verification result:
+- not run
+blockers:
+- missing fixture setup
+suggested next decision:
+- ask decision-codex to repair the worker brief
+OUT
+    exit 0
   fi
   cat > "$out" <<'OUT'
 changed files:
@@ -503,11 +802,14 @@ make_repo() {
     git init -q
     mkdir -p .codestable/reference
     mkdir -p .codestable/features/2026-06-14-demo
+    mkdir -p .codestable/roadmap/permission-system
     mkdir -p src
     printf '# attention\n' > .codestable/attention.md
     printf '# overview\n' > .codestable/reference/system-overview.md
     printf '# shared conventions\n' > .codestable/reference/shared-conventions.md
     printf '# design\n' > .codestable/features/2026-06-14-demo/demo-design.md
+    printf '# permission-system roadmap\n' > .codestable/roadmap/permission-system/permission-system-roadmap.md
+    printf 'roadmap: permission-system\nitems: []\n' > .codestable/roadmap/permission-system/permission-system-items.yaml
   )
   echo "$repo"
 }
@@ -569,6 +871,7 @@ test_help_unknown_empty_human_and_missing_codex() {
   run_capture "$SCRIPT" --help
   assert_eq "$LAST_STATUS" "0" "help exits 0"
   assert_contains "$LAST_OUTPUT" "Usage:" "help prints usage"
+  assert_contains "$LAST_OUTPUT" "--init" "help prints init usage"
 
   run_capture "$SCRIPT" --bad
   assert_eq "$LAST_STATUS" "2" "unknown argument exits 2"
@@ -586,6 +889,24 @@ test_help_unknown_empty_human_and_missing_codex() {
   assert_contains "$LAST_OUTPUT" "--human-decision requires a non-empty value" "empty human decision message"
 }
 
+test_init_mode_creates_complete_loop_without_codex() {
+  local repo loop calls
+  repo="$(make_repo init-mode)"
+  : > "$CODEX_STUB_LOG"
+  run_capture bash -c "cd '$repo' && PATH=/usr/bin:/bin '$SCRIPT' --init --loop-dir .codestable/loops/2026-06-15-init-demo --objective 'Initialize demo loop'"
+  assert_eq "$LAST_STATUS" "0" "init mode exits 0 without codex"
+  assert_contains "$LAST_OUTPUT" "Loop initialized" "init mode message"
+  loop="$repo/.codestable/loops/2026-06-15-init-demo"
+  [ -f "$loop/loop.md" ] || fail "init mode did not create loop.md"
+  assert_file_contains "$loop/loop.md" "Initialize demo loop" "init mode writes objective"
+  assert_file_contains "$loop/loop.md" "## Scope" "init mode writes scope"
+  assert_file_contains "$loop/loop.md" "## Stop Condition" "init mode writes stop condition"
+  assert_file_contains "$loop/loop.md" "## Verification" "init mode writes verification"
+  assert_file_contains "$loop/state.yaml" 'slug: "init-demo"' "init mode writes state slug"
+  calls="$(wc -l < "$CODEX_STUB_LOG" | tr -d ' ')"
+  assert_eq "$calls" "0" "init mode should not run codex"
+}
+
 test_initializes_missing_loop_dir_and_state_files() {
   local repo
   repo="$(make_repo initialize)"
@@ -594,10 +915,21 @@ test_initializes_missing_loop_dir_and_state_files() {
   assert_eq "$LAST_STATUS" "0" "missing loop dir is created"
   local loop="$repo/.codestable/loops/2026-06-14-new-loop"
   [ -d "$loop/runs" ] || fail "runs directory was not created"
-  for file in state.yaml decision-log.md approval-log.md worker-brief.md human-escalation.md human-decision.md; do
+  for file in loop.md state.yaml decision-log.md approval-log.md worker-brief.md human-escalation.md human-decision.md subtask-summary.md; do
     [ -f "$loop/$file" ] || fail "missing initialized $file"
   done
+  assert_file_contains "$loop/loop.md" "## Objective" "initial loop objective section"
+  assert_file_contains "$loop/loop.md" "## Scope" "initial loop scope section"
+  assert_file_contains "$loop/loop.md" "## Stop Condition" "initial loop stop condition section"
+  assert_file_contains "$loop/loop.md" "## Verification" "initial loop verification section"
   assert_file_contains "$loop/state.yaml" "doc_type: loop-state" "initial state doc type"
+  assert_file_contains "$loop/state.yaml" 'slug: "new-loop"' "initial state slug"
+  assert_file_contains "$loop/state.yaml" "active_roadmap: null" "initial roadmap state"
+  assert_file_contains "$loop/state.yaml" "active_roadmap_item: null" "initial roadmap item state"
+  assert_file_contains "$loop/state.yaml" "roadmap_stage: null" "initial roadmap stage"
+  assert_file_contains "$loop/state.yaml" "last_subtask_summary: null" "initial subtask summary"
+  assert_file_contains "$loop/state.yaml" "blocker_count: 0" "initial blocker count"
+  assert_file_contains "$loop/state.yaml" "last_blocker_signature: null" "initial blocker signature"
   assert_file_contains "$loop/state.yaml" "updated: $(date +%F)" "state updated date"
 }
 
@@ -615,6 +947,8 @@ test_human_decision_record_mode() {
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "next_actor: decision-codex" "human decision routes to decision"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'last_human_decision: ".codestable/loops/2026-06-14-demo/human-decision.md#' "human decision records pointer"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "blocked_reason: null" "human decision clears blocked reason"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "blocker_count: 0" "human decision clears blocker count"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "last_blocker_signature: null" "human decision clears blocker signature"
   local calls
   calls="$(wc -l < "$CODEX_STUB_LOG" | tr -d ' ')"
   assert_eq "$calls" "0" "human decision record should not run codex"
@@ -771,6 +1105,22 @@ test_approval_escalate_path_skips_worker() {
   assert_eq "$calls" "2" "approval ESCALATE should not run worker"
 }
 
+test_approval_escalation_template_validation() {
+  local repo calls
+  repo="$(make_repo approval-escalate-missing-template)"
+  make_loop "$repo"
+  : > "$CODEX_STUB_LOG"
+  CODEX_STUB_DECISION=continue CODEX_STUB_APPROVAL=escalate-missing-template \
+    run_capture bash -c "cd '$repo' && '$SCRIPT' --loop-dir .codestable/loops/2026-06-14-demo"
+  assert_eq "$LAST_STATUS" "24" "invalid approval escalation exits 24"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "status: blocked" "invalid escalation blocks"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "next_actor: human" "invalid escalation routes human"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'blocked_reason: "approval escalation report failed template validation"' "invalid escalation records reason"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/human-escalation.md" "missing the required template" "invalid escalation output copied"
+  calls="$(wc -l < "$CODEX_STUB_LOG" | tr -d ' ')"
+  assert_eq "$calls" "2" "invalid escalation should not run worker"
+}
+
 test_bad_approval_path_writes_escalation() {
   local repo
   repo="$(make_repo bad-approval)"
@@ -814,12 +1164,17 @@ test_continue_path_runs_worker() {
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/decision-log.md" "Status: CONTINUE" "CONTINUE logged"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/approval-log.md" "Status: APPROVED" "CONTINUE approval logged"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/decision-log.md" "worker-codex" "worker logged"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/decision-log.md" "Decision summary:" "decision log has structured summary"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/approval-log.md" "Approval rationale:" "approval log has structured rationale"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/decision-log.md" "Verification:" "worker log records verification"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'last_decision: "CONTINUE"' "CONTINUE records last decision"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'last_approval: "APPROVED"' "CONTINUE records approval"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'active_workflow: "cs-feat"' "CONTINUE records active workflow"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "next_actor: decision-codex" "worker completion routes back to decision"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "iteration: 1" "worker completion increments iteration"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'last_worker_result: ".codestable/loops/2026-06-14-demo/runs/' "worker completion records output"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'last_verification: "passed"' "worker completion records verification"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "blocker_count: 0" "worker completion clears blocker count"
   local calls
   calls="$(wc -l < "$CODEX_STUB_LOG" | tr -d ' ')"
   assert_eq "$calls" "3" "CONTINUE should run decision, approval, and worker"
@@ -847,6 +1202,79 @@ test_continue_without_workflow_or_artifact_requests_revision() {
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "status: needs-revision" "missing artifact marks revision"
 }
 
+test_worker_brief_script_validation() {
+  local repo calls
+  repo="$(make_repo missing-return-format)"
+  make_loop "$repo"
+  : > "$CODEX_STUB_LOG"
+  CODEX_STUB_DECISION=continue-missing-return-format run_capture bash -c "cd '$repo' && '$SCRIPT' --loop-dir .codestable/loops/2026-06-14-demo"
+  assert_eq "$LAST_STATUS" "26" "brief missing return format fails script validation"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "status: needs-revision" "brief validation marks revision"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "next_actor: decision-codex" "brief validation routes back to decision"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'blocked_reason: "worker brief failed script validation"' "brief validation records reason"
+  calls="$(wc -l < "$CODEX_STUB_LOG" | tr -d ' ')"
+  assert_eq "$calls" "2" "brief validation should not run worker"
+}
+
+test_roadmap_draft_records_metadata() {
+  local repo
+  repo="$(make_repo roadmap-draft)"
+  make_loop "$repo"
+  : > "$CODEX_STUB_LOG"
+  CODEX_STUB_DECISION=roadmap-draft run_capture bash -c "cd '$repo' && '$SCRIPT' --loop-dir .codestable/loops/2026-06-14-demo"
+  assert_eq "$LAST_STATUS" "0" "roadmap draft continue exits 0"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'active_workflow: "cs-roadmap"' "roadmap workflow recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'active_roadmap: "permission-system"' "active roadmap recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "active_roadmap_item: null" "null roadmap item recorded from decision metadata"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'roadmap_stage: "roadmap-draft"' "roadmap stage recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/worker-brief.md" "## Active Workflow" "roadmap worker brief written"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/worker-brief.md" '`cs-roadmap`' "roadmap worker brief keeps workflow"
+}
+
+test_roadmap_item_context_boundary() {
+  local repo
+  repo="$(make_repo roadmap-item-no-boundary)"
+  make_loop "$repo"
+  : > "$CODEX_STUB_LOG"
+  CODEX_STUB_DECISION=roadmap-item-no-boundary run_capture bash -c "cd '$repo' && '$SCRIPT' --loop-dir .codestable/loops/2026-06-14-demo"
+  assert_eq "$LAST_STATUS" "22" "roadmap item without context boundary requests revision"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "status: needs-revision" "missing context boundary marks revision"
+
+  repo="$(make_repo roadmap-item-no-summary)"
+  make_loop "$repo"
+  : > "$CODEX_STUB_LOG"
+  CODEX_STUB_DECISION=roadmap-item-no-summary run_capture bash -c "cd '$repo' && '$SCRIPT' --loop-dir .codestable/loops/2026-06-14-demo"
+  assert_eq "$LAST_STATUS" "22" "roadmap item without previous summary requests revision"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "status: needs-revision" "missing previous summary marks revision"
+
+  repo="$(make_repo roadmap-item-start)"
+  make_loop "$repo"
+  : > "$CODEX_STUB_LOG"
+  CODEX_STUB_DECISION=roadmap-item-start run_capture bash -c "cd '$repo' && '$SCRIPT' --loop-dir .codestable/loops/2026-06-14-demo"
+  assert_eq "$LAST_STATUS" "0" "roadmap item with context boundary exits 0"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'active_workflow: "cs-feat"' "roadmap item workflow recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'active_roadmap: "permission-system"' "roadmap item active roadmap recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'active_roadmap_item: "permission-rbac-core"' "active roadmap item recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'roadmap_stage: "feature-design"' "roadmap item stage recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'last_subtask_summary: "Completed roadmap decomposition; no previous feature item."' "previous summary recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/worker-brief.md" "## Context Boundary" "context boundary copied to worker brief"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/worker-brief.md" "## Previous Subtask Summary" "previous summary copied to worker brief"
+}
+
+test_roadmap_metadata_list_format_and_escaping() {
+  local repo
+  repo="$(make_repo roadmap-list-metadata)"
+  make_loop "$repo"
+  : > "$CODEX_STUB_LOG"
+  CODEX_STUB_DECISION=roadmap-list-metadata run_capture bash -c "cd '$repo' && '$SCRIPT' --loop-dir .codestable/loops/2026-06-14-demo"
+  assert_eq "$LAST_STATUS" "0" "roadmap list metadata exits 0"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'active_workflow: "cs-feat"' "list active workflow recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'active_roadmap: "permission-system"' "snake_case roadmap recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'active_roadmap_item: "permission-rbac-core"' "snake_case roadmap item recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'roadmap_stage: "feature-impl"' "snake_case roadmap stage recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'last_subtask_summary: "Accepted \"phase one\" with path src\\demo"' "previous summary escaped in state"
+}
+
 test_preserves_existing_iteration_and_unique_run_names() {
   local repo
   repo="$(make_repo preserve-state)"
@@ -870,6 +1298,10 @@ STATE
   assert_eq "$LAST_STATUS" "0" "existing state continue exits 0"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "iteration: 4" "existing iteration is preserved and incremented"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "updated: $(date +%F)" "existing state updated date refreshed"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "active_roadmap: null" "existing state gets roadmap field"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "active_roadmap_item: null" "existing state gets roadmap item field"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "roadmap_stage: null" "existing state gets roadmap stage field"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "last_subtask_summary: null" "existing state gets subtask summary field"
 
   CODEX_STUB_DECISION=done run_capture bash -c "cd '$repo' && '$SCRIPT' --loop-dir .codestable/loops/2026-06-14-demo"
   assert_eq "$LAST_STATUS" "0" "second run exits 0"
@@ -886,9 +1318,32 @@ test_worker_failure_records_state_and_output() {
   assert_eq "$LAST_STATUS" "42" "worker failure exits with worker status"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "status: blocked" "worker failure marks blocked"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "next_actor: decision-codex" "worker failure returns to decision"
-  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'blocked_reason: "worker-codex failed with exit 42"' "worker failure records reason"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'blocked_reason: "worker-codex failed with exit 42: simulated worker failure"' "worker failure records reason"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'last_verification: "failed"' "worker failure records verification"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "blocker_count: 1" "worker failure increments blocker count"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/decision-log.md" "Status: FAILED (42)" "worker failure logged"
   assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/runs/"*"worker-codex.md" "simulated worker failure" "worker failure output preserved"
+}
+
+test_worker_reported_blocker_and_repeated_escalation() {
+  local repo
+  repo="$(make_repo repeated-blocker)"
+  make_loop "$repo"
+  : > "$CODEX_STUB_LOG"
+  CODEX_STUB_DECISION=continue CODEX_STUB_WORKER=blocker \
+    run_capture bash -c "cd '$repo' && '$SCRIPT' --loop-dir .codestable/loops/2026-06-14-demo"
+  assert_eq "$LAST_STATUS" "25" "worker reported blocker exits 25"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "status: blocked" "worker blocker marks blocked"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "blocker_count: 1" "worker blocker increments count"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" 'last_verification: "not run"' "worker blocker records verification"
+
+  CODEX_STUB_DECISION=continue CODEX_STUB_WORKER=blocker \
+    run_capture bash -c "cd '$repo' && '$SCRIPT' --loop-dir .codestable/loops/2026-06-14-demo"
+  assert_eq "$LAST_STATUS" "20" "repeated worker blocker escalates"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "status: waiting-human" "repeated blocker waits for human"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "next_actor: human" "repeated blocker routes human"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/state.yaml" "blocker_count: 2" "repeated blocker count recorded"
+  assert_file_contains "$repo/.codestable/loops/2026-06-14-demo/human-escalation.md" "same worker blocker" "repeated blocker writes human report"
 }
 
 test_prompt_contract_contains_required_context() {
@@ -917,16 +1372,24 @@ test_prompt_contract_contains_required_context() {
   assert_file_contains "$decision_prompt" "read-only" "decision prompt states read-only"
   assert_file_contains "$decision_prompt" "Do not approve your own output" "decision prompt forbids self approval"
   assert_file_contains "$decision_prompt" "First choose an active CodeStable workflow" "decision prompt requires active workflow"
+  assert_file_contains "$decision_prompt" "classify task size" "decision prompt requires size routing"
+  assert_file_contains "$decision_prompt" "Use cs-roadmap" "decision prompt names roadmap route"
+  assert_file_contains "$decision_prompt" "Previous Subtask Summary" "decision prompt requires roadmap summary boundary"
   assert_file_contains "$decision_prompt" "prompt objective" "decision prompt includes objective"
 
   assert_file_contains "$approval_prompt" "Decision output to review:" "approval prompt names decision output"
   assert_file_contains "$approval_prompt" "Parsed decision status:" "approval prompt includes parsed decision"
   assert_file_contains "$approval_prompt" "LOOP_APPROVAL: APPROVED" "approval prompt lists statuses"
   assert_file_contains "$approval_prompt" "Do not invent a replacement plan" "approval prompt preserves approval boundary"
+  assert_file_contains "$approval_prompt" "task-size routing" "approval prompt checks size routing"
+  assert_file_contains "$approval_prompt" "items.yaml DAG" "approval prompt checks roadmap split"
+  assert_file_contains "$approval_prompt" "Context Boundary" "approval prompt checks context boundary"
   assert_file_contains "$approval_prompt" "prompt objective" "approval prompt includes objective"
 
   assert_file_contains "$worker_prompt" "Only execute the approved task" "worker prompt limits execution"
   assert_file_contains "$worker_prompt" "does not name an Active Workflow" "worker prompt blocks missing workflow"
+  assert_file_contains "$worker_prompt" "Context Boundary" "worker prompt honors context boundary"
+  assert_file_contains "$worker_prompt" "Previous Subtask Summary" "worker prompt honors summary-only prior context"
   assert_file_contains "$worker_prompt" "Return:" "worker prompt includes return contract"
 }
 
@@ -948,6 +1411,7 @@ test_requires_loop_dir
 test_requires_codestable
 test_requires_complete_codestable_skeleton
 test_help_unknown_empty_human_and_missing_codex
+test_init_mode_creates_complete_loop_without_codex
 test_initializes_missing_loop_dir_and_state_files
 test_human_decision_record_mode
 test_human_decision_appends_and_escapes_state_pointer
@@ -960,12 +1424,18 @@ test_decision_status_must_be_first_line_and_uppercase
 test_multiple_decision_status_uses_first_line
 test_approval_revise_path_skips_worker
 test_approval_escalate_path_skips_worker
+test_approval_escalation_template_validation
 test_bad_approval_path_writes_escalation
 test_approval_status_must_be_first_line
 test_continue_path_runs_worker
 test_continue_without_workflow_or_artifact_requests_revision
+test_worker_brief_script_validation
+test_roadmap_draft_records_metadata
+test_roadmap_item_context_boundary
+test_roadmap_metadata_list_format_and_escaping
 test_preserves_existing_iteration_and_unique_run_names
 test_worker_failure_records_state_and_output
+test_worker_reported_blocker_and_repeated_escalation
 test_prompt_contract_contains_required_context
 test_continue_path_extracts_list_workflow
 

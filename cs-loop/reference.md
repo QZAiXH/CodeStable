@@ -58,12 +58,18 @@ status: active # active | needs-revision | waiting-human | done | blocked
 iteration: 0
 next_actor: decision-codex
 active_workflow: null
+active_roadmap: null
+active_roadmap_item: null
+roadmap_stage: null
 last_decision: null
 last_approval: null
 last_human_decision: null
 last_worker_result: null
+last_subtask_summary: null
 last_verification: null
 blocked_reason: null
+blocker_count: 0
+last_blocker_signature: null
 updated: YYYY-MM-DD
 ```
 
@@ -76,11 +82,11 @@ updated: YYYY-MM-DD
 
 Status: CONTINUE | ESCALATE | DONE
 
-Decision:
+Decision summary:
 
 - ...
 
-Evidence:
+Evidence index:
 
 - ...
 
@@ -117,37 +123,35 @@ Human escalation written:
 # Worker Brief
 
 ## Task
-
 {one narrow implementation task}
 
 ## Active Workflow
-
-`cs-feat` | `cs-issue` | `cs-refactor` | `cs-audit` | `cs-explore` | `cs-decide` | `cs-learn` | `cs-trick`
+`cs-feat` | `cs-roadmap` | `cs-issue` | `cs-refactor` | `cs-audit` | `cs-explore` | `cs-decide` | `cs-learn` | `cs-trick`
 
 ## Inputs
-
 - loop: `loop.md`
 - relevant CodeStable artifacts:
   - ...
 
 ## Allowed Changes
-
 - ...
 
 ## Do Not Change
-
 - ...
 
-## Steps
+## Context Boundary
+{required for a new roadmap item; otherwise optional}
 
+## Previous Subtask Summary
+{3-6 bullets only; no prior worker output dump}
+
+## Steps
 1. ...
 
 ## Verification
-
 - `{command}`
 
 ## Return Format
-
 - changed files
 - verification result
 - blockers
@@ -207,7 +211,6 @@ decision proposal, approval concern, and concrete blocker}
 
 ```text
 You are decision-codex for a CodeStable loop.
-
 You are read-only. Do not modify source code. Your job is to propose low-level
 loop decisions. You do not approve your own output; approval-codex will review
 it before any worker runs or any human is asked.
@@ -220,7 +223,7 @@ Read:
 - .codestable/attention.md
 - loop directory
 - human-decision.md if present
-- relevant CodeStable artifacts
+- relevant CodeStable artifacts; roadmap-loop.md for feature/change objectives
 - git diff and verification evidence if present
 - latest approval-log.md notes if present
 
@@ -244,7 +247,6 @@ or done evidence.
 
 ```text
 You are approval-codex for a CodeStable loop.
-
 You are read-only. Do not modify source code or CodeStable artifacts. Your job is
 to independently approve, reject for revision, or escalate the latest
 decision-codex proposal. Do not invent a replacement plan and do not approve
@@ -255,7 +257,7 @@ Read:
 - loop directory
 - human-decision.md if present
 - latest decision-codex output
-- relevant CodeStable artifacts
+- relevant CodeStable artifacts; roadmap-loop.md for feature/change objectives
 - git diff and verification evidence if present
 
 Approve only if the proposal is low-risk, grounded in existing CodeStable
@@ -283,13 +285,11 @@ Recommendation, Evidence, and If Not Decided.
 
 ```text
 You are worker-codex for a CodeStable loop.
-
 Only execute approved worker-brief.md. Do not make product, architecture,
 tech-stack, long-term constraint, security/privacy/data, or scope decisions. If
 the brief is underspecified, stop and report a blocker. If worker-brief.md does
 not name an Active Workflow and concrete CodeStable artifact paths, stop and
 report a blocker.
-
 After changes, run the requested verification when possible.
 
 Return:

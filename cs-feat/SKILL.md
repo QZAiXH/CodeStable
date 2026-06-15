@@ -51,7 +51,7 @@ brainstorm 是讨论层独立入口，会分诊：case 1（清楚 → 直接 des
 
 阶段间有人工 checkpoint。上一阶段没拿到用户明确放行，下一阶段别开始——防止 AI 一口气从需求跑到代码、跑出来才发现走偏。
 
-阶段 0 可选且是 feature 流程的**外部入口**——`cs-brainstorm` 同时服务 feature 和 roadmap。case 3（大需求）讨论被移交给 `cs-roadmap` 不再回 feature 流程；roadmap 拆出子 feature 后从 `cs-feat-design` 的"从 roadmap 条目起头"入口进来。
+阶段 0 可选且是 feature 流程的**外部入口**——`cs-brainstorm` 同时服务 feature 和 roadmap。case 3（大需求）讨论被移交给 `cs-roadmap` 不再回 feature 流程；roadmap 拆出子 feature 后从 `cs-feat-design` 的"从 roadmap 条目起头"入口进来。`cs-loop` 自动编排新功能时也遵守这个边界：先判断单 feature 还是 roadmap，再逐条进入本流程。
 
 ### Fastforward 模式
 
