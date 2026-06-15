@@ -54,6 +54,7 @@ onboard 完成后骨架（`cs-onboard` 负责搭建）：
 │       ├── worker-brief.md
 │       ├── human-escalation.md
 │       ├── human-decision.md
+│       ├── subtask-summary.md
 │       └── runs/
 ├── brainstorm/            brainstorm 阶段 spike 实验代码区（cs-brainstorm 临时产出）
 │   └── {slug}/            一次 spike 一个子目录，文件名随意

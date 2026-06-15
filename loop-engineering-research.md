@@ -247,30 +247,26 @@ LOOP_APPROVAL: ESCALATE
 10. 单个 Markdown 文件不超过 300 行；超过就拆成主文档和 reference。
 
 ## 当前实现评估
-已有实现是一个合理的最小闭环：
+当前实现已经从"最小闭环"推进到可用的 P0 控制层：
 
 - `cs-loop/SKILL.md` / `reference.md` 明确角色、升级策略、产物结构、模板和 prompt skeleton。
 - `tools/codex-loop.sh` 能跑 decision → approval → worker，并检查 `.codestable/attention.md`、`system-overview.md`、`shared-conventions.md`。
-- 脚本测试用假的 `codex exec` 覆盖 DONE、ESCALATE、CONTINUE、APPROVED、REVISE、UNPARSEABLE，不消耗模型调用。
+- 脚本支持 `--init` 完整初始化 loop 控制文件，校验 approved worker brief 必填字段，校验 human escalation 模板。
+- worker 输出会提取 `verification result` 写入 `last_verification`，同一 blocker 连续两轮会升级给人类。
+- 脚本测试用假的 `codex exec` 覆盖 DONE、ESCALATE、CONTINUE、APPROVED、REVISE、UNPARSEABLE、缺 brief 字段、连续 blocker，不消耗模型调用。
 
-主要短板：
+仍需长期改进：
 
-- 初始化能力还偏弱：会创建缺失的 `state.yaml`，但不会完整初始化 `loop.md`。
-- `decision-log.md` / `approval-log.md` 只追加输出路径和状态，未结构化记录摘要、证据和审批理由。
-- `last_verification`、连续 blocker 计数和升级策略尚未在脚本层强制。
 - `ACTIVE_WORKFLOW` 解析依赖文本 grep，长期应考虑结构化输出或 schema。
-- worker brief 只是拷贝 approved decision 输出，未校验是否真的包含必填字段。
+- `decision-log.md` / `approval-log.md` 已有摘要和证据索引，但还不是机器可验证 schema。
+- `runs/` 仍主要保存最终消息，尚未拆分 prompt、stdout、stderr 或 JSONL 事件。
 
 ## 建议的开发路线
 
 ### P0：把控制层跑稳
 
-- 增加 `init` 或 `--init` 模式，按模板生成完整 loop 目录。
-- 对 `worker-brief.md` 做必填字段校验：Task、Active Workflow、Inputs、Allowed Changes、Verification、Return Format。
-- 对 `approval-codex` 输出做模板校验：APPROVED / REVISE / ESCALATE 的必填字段不同，ESCALATE 必须包含 Context Brief。
-- 在 `state.yaml` 中增加 `blocker_count`、`last_blocker_signature`。
-- 从 worker 输出中提取 verification 摘要，写入 `last_verification`。
-- 增加脚本测试覆盖：缺 loop.md、缺 worker brief 字段、连续 blocker 升级。
+- 已完成：`--init`、worker brief 必填字段校验、ESCALATE 模板校验、`blocker_count` / `last_blocker_signature`、`last_verification` 提取、缺字段和连续 blocker 测试。
+- 保持要求：后续每次改脚本都要补离线测试，不能让 P0 gate 回退。
 
 ### P1：提高可追溯性
 

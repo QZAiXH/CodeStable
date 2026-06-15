@@ -193,6 +193,7 @@ feature-design 发现接口契约不合理 / 漏了 / 描述不准 → **回 `cs
 | `cs-arch` 配合 | architecture 记现状、roadmap 记若干步。读 arch 理解现状但不改它 |
 | `cs-feat` 下游 | 每条子 feature 是未来一次 feature 流程的种子；起头时 design frontmatter 带 `roadmap` / `roadmap_item` |
 | `cs-feat-accept` 回写方 | acceptance 自动改 items.yaml 为 `done`，本技能只定义格式不负责回写 |
+| `cs-loop` 编排方 | loop 可先用本技能拆大需求并让 approval-codex 审核拆解，通过后逐条启动 `cs-feat`；每条 item 必须用短摘要隔离上一条上下文 |
 | `cs-onboard` 创建者 | 建 `roadmap/` 空目录 |
 | `cs-brainstorm` 上游 | case 3 移交本技能，带"真问题 / 大致范围 / 可能子模块"一句话汇总。本技能不重复分诊直接拆 |
 
